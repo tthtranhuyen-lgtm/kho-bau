@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🏴‍☠️ Truy Tìm Kho Báu Tiếng Trung 🏴‍☠️</title>
+    
+    <!-- Thư viện tạo hiệu ứng pháo hoa -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@500&display=swap');
 
@@ -37,42 +41,43 @@
 
         header {
             text-align: center;
-            padding: 10px;
+            padding: 10px 10px 15px 10px;
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(5px);
             border-bottom: 4px dashed #ff8a5c;
             z-index: 10;
+            flex-shrink: 0; /* Ngăn header bị co lại */
         }
 
         h1 {
             font-family: 'ZCOOL KuaiLe', cursive;
             margin: 0;
             color: #ff4757;
-            font-size: 28px;
+            font-size: 26px;
             text-shadow: 2px 2px 0px #fff;
         }
 
         .subtitle {
             color: #2f3542;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             margin-top: 5px;
             background: #fff;
             display: inline-block;
             padding: 4px 12px;
             border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .game-container {
             display: flex;
             flex: 1;
-            padding: 15px;
+            padding: 10px 15px;
             gap: 20px;
             max-width: 1400px;
             margin: 0 auto;
             width: 100%;
-            height: calc(100vh - 80px);
-            overflow: hidden;
+            overflow: hidden; /* Ngăn cuộn toàn trang */
         }
 
         /* ================= BẢN ĐỒ KHO BÁU ================= */
@@ -229,37 +234,38 @@
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(10px);
             border-radius: 24px;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            padding: 15px;
+            /* Sửa lỗi che chữ: Dùng block thay vì flex center */
+            overflow: auto; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             border: 4px solid #fff;
-            overflow: auto;
         }
 
         .grid {
             display: grid;
             grid-template-columns: repeat(14, 1fr);
-            gap: 5px;
+            gap: 4px;
             background: #dfe4ea;
             padding: 10px;
             border-radius: 16px;
+            /* Căn giữa bảng chữ mà không bị cắt phần trên */
+            margin: 0 auto;
+            width: fit-content;
         }
 
         .cell {
-            width: 42px;
-            height: 42px;
+            width: 38px; /* Thu nhỏ ô chữ một chút để vừa màn hình */
+            height: 38px;
             background: var(--cell-bg);
             display: flex;
             justify-content: center;
             align-items: center;
             font-family: 'Noto Sans SC', sans-serif;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: bold;
             color: #2f3542;
             cursor: pointer;
-            border-radius: 8px;
+            border-radius: 6px;
             box-shadow: 0 3px 0px #ced6e0;
             transition: all 0.1s;
         }
@@ -278,15 +284,25 @@
             background: var(--found-bg);
             color: var(--found-text);
             box-shadow: 0 3px 0px #20bf6b;
-            animation: pop 0.3s ease;
+            animation: pop 0.4s ease;
         }
 
         @keyframes pop {
             0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
+            50% { transform: scale(1.3) rotate(5deg); }
+            100% { transform: scale(1) rotate(0); }
         }
 
+        /* Hiệu ứng rung khi chọn đúng */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+        }
+        .shake-effect { animation: shake 0.4s ease; }
+
+        /* Các nút điều khiển */
         .reset-btn {
             position: absolute;
             bottom: 20px;
@@ -345,7 +361,7 @@
                 height: auto;
             }
             .map-wrapper { flex: none; height: 350px; width: 100%; }
-            .grid-panel { overflow-x: auto; height: auto; }
+            .grid-panel { padding: 10px; }
             .cell { width: 32px; height: 32px; font-size: 16px; }
             body { overflow: auto; height: auto; }
         }
@@ -381,7 +397,7 @@
             </div>
         </div>
 
-        <div class="grid-panel">
+        <div class="grid-panel" id="grid-panel">
             <div class="grid" id="grid"></div>
         </div>
     </div>
@@ -433,6 +449,9 @@
         let startR = -1, startC = -1;
         let currentSelection = [];
 
+        // Cấu hình pháo hoa
+        const confettiSettings = { particleCount: 80, spread: 70, origin: { y: 0.6 }, colors: ['#ff4757', '#ffa502', '#2ed573', '#1e90ff', '#ff9ff3'] };
+
         function init() {
             renderSingleClue();
             renderGrid();
@@ -482,38 +501,32 @@
                     cell.dataset.c = c;
                     cell.id = `cell-${r}-${c}`;
 
-                    // Sự kiện Chuột
                     cell.addEventListener('mousedown', (e) => handleStart(r, c, e));
                     cell.addEventListener('mouseenter', (e) => handleMove(r, c, e));
                     
-                    // Sự kiện Cảm ứng (Điện thoại)
-                    cell.addEventListener('touchstart', (e) => { e.preventDefault(); handleStart(r, c, e); });
-                    cell.addEventListener('touchmove', (e) => handleTouchMove(e));
+                    cell.addEventListener('touchstart', (e) => { e.preventDefault(); handleStart(r, c, e); }, {passive: false});
+                    cell.addEventListener('touchmove', (e) => handleTouchMove(e), {passive: false});
 
                     grid.appendChild(cell);
                 }
             }
         }
 
-        // Xử lý khi bắt đầu bấm vào một ô
         function handleStart(r, c, e) {
             if (isCellFound(r, c)) return;
             
             if (!isSelecting) {
-                // Lần bấm đầu tiên: Bắt đầu chọn
                 isSelecting = true;
                 isDragging = true;
                 startR = r;
                 startC = c;
                 updateSelection(r, c);
             } else {
-                // Lần bấm thứ 2: Chốt điểm cuối (dành cho kiểu Click-Click)
                 updateSelection(r, c);
                 evaluateSelection();
             }
         }
 
-        // Xử lý khi di chuột qua các ô khác (kéo thả)
         function handleMove(r, c, e) {
             if (!isSelecting || !isDragging) return;
             if (isCellFound(r, c)) return;
@@ -521,7 +534,6 @@
             updateSelection(r, c);
         }
 
-        // Xử lý khi vuốt trên điện thoại
         function handleTouchMove(e) {
             if (!isSelecting || !isDragging) return;
             const touch = e.touches[0];
@@ -535,7 +547,6 @@
             }
         }
 
-        // Tô sáng các ô đang được chọn
         function updateSelection(endR, endC) {
             document.querySelectorAll('.cell.selecting').forEach(el => el.classList.remove('selecting'));
             currentSelection = [];
@@ -556,19 +567,16 @@
             }
         }
 
-        // Xử lý khi nhả chuột / nhấc tay
         function handleEnd() {
             if (!isSelecting) return;
             if (isDragging) {
                 isDragging = false;
-                // Nếu kéo được nhiều hơn 1 ô thì chốt luôn
                 if (currentSelection.length > 1) {
                     evaluateSelection();
                 }
             }
         }
 
-        // Kiểm tra xem chuỗi chữ vừa chọn có đúng không
         function evaluateSelection() {
             if (currentSelection.length === 0) return;
 
@@ -581,32 +589,55 @@
             );
 
             if (matchIndex !== -1) {
+                // === CHỌN ĐÚNG ===
                 let match = answers[matchIndex];
                 foundAnswers.push(match.id);
+                
+                // Đổi màu xanh cho các chữ đã chọn
                 currentSelection.forEach(item => {
                     const cell = document.getElementById(`cell-${item.r}-${item.c}`);
                     cell.classList.remove('selecting');
                     cell.classList.add('found');
                 });
 
-                // Tự động nhảy sang câu tiếp theo chưa giải
+                // 1. Kích hoạt pháo hoa
+                confetti(confettiSettings);
+                
+                // 2. Hiệu ứng rung màn hình nhẹ
+                document.getElementById('grid-panel').classList.add('shake-effect');
+                setTimeout(() => {
+                    document.getElementById('grid-panel').classList.remove('shake-effect');
+                }, 400);
+
+                // 3. Chuyển sang câu tiếp theo chưa giải
                 let nextUnsolvedIndex = answers.findIndex(ans => !foundAnswers.includes(ans.id));
                 if (nextUnsolvedIndex !== -1) {
                     currentClueIndex = nextUnsolvedIndex;
                 } else {
+                    // Nếu đã giải hết
                     currentClueIndex = matchIndex; 
-                    document.getElementById('win-overlay').style.display = 'flex';
+                    setTimeout(() => {
+                        document.getElementById('win-overlay').style.display = 'flex';
+                        // Bắn pháo hoa liên tục khi thắng
+                        let duration = 3 * 1000;
+                        let end = Date.now() + duration;
+                        (function frame() {
+                            confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#ff4757', '#2ed573'] });
+                            confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#1e90ff', '#ffa502'] });
+                            if (Date.now() < end) requestAnimationFrame(frame);
+                        }());
+                    }, 500);
                 }
                 
                 renderSingleClue();
             } else {
+                // === CHỌN SAI ===
                 currentSelection.forEach(item => {
                     const cell = document.getElementById(`cell-${item.r}-${item.c}`);
                     cell.classList.remove('selecting');
                 });
             }
             
-            // Reset trạng thái chọn
             currentSelection = [];
             isSelecting = false;
             isDragging = false;
