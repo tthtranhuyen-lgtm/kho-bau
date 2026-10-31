@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏴‍☠️ Truy Tìm Kho Báu Tiếng Trung 🏴‍☠️</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@500&display=swap');
+
+        :root {
+            --cell-bg: #fff8e7;
+            --highlight: #ffb347;
+            --found-bg: #2ed573;
+            --found-text: #ffffff;
+            --map-bg: #f4d690;
+            --map-border: #3e2723;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #a8e6cf;
+            background-image: radial-gradient(#ffffff 15%, transparent 16%), radial-gradient(#ffffff 15%, transparent 16%);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            overflow: hidden;
+        }
+
+        header {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(5px);
+            border-bottom: 4px dashed #ff8a5c;
+            z-index: 10;
+        }
+
+        h1 {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            margin: 0;
+            color: #ff4757;
+            font-size: 28px;
+            text-shadow: 2px 2px 0px #fff;
+        }
+
+        .subtitle {
+            color: #2f3542;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 5px;
+            background: #fff;
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 10px;
+        }
+
+        .game-container {
+            display: flex;
+            flex: 1;
+            padding: 15px;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            height: calc(100vh - 80px);
+            overflow: hidden;
+        }
+
+        /* ================= BẢN ĐỒ KHO BÁU ================= */
+        .map-wrapper {
+            flex: 0 0 380px;
+            height: 100%;
+            position: relative;
+            filter: drop-shadow(5px 10px 15px rgba(0,0,0,0.3));
+            display: flex;
+            flex-direction: column;
+        }
+
+        .map-panel {
+            width: 100%;
+            height: 100%;
+            background-color: var(--map-bg);
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(139, 69, 19, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(139, 69, 19, 0.08) 0%, transparent 40%);
+            
+            clip-path: polygon(
+                2% 3%, 8% 0%, 15% 2%, 25% 0%, 35% 3%, 45% 1%, 55% 4%, 65% 0%, 75% 3%, 85% 0%, 95% 2%, 98% 8%, 
+                100% 15%, 97% 25%, 100% 35%, 98% 45%, 100% 55%, 97% 65%, 100% 75%, 98% 85%, 100% 95%, 
+                95% 98%, 85% 100%, 75% 97%, 65% 100%, 55% 98%, 45% 100%, 35% 97%, 25% 100%, 15% 98%, 5% 100%, 
+                0% 95%, 2% 85%, 0% 75%, 3% 65%, 0% 55%, 2% 45%, 0% 35%, 3% 25%, 0% 15%, 2% 8%
+            );
+            
+            border: 6px solid var(--map-border);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 20px;
+        }
+
+        .map-icon {
+            position: absolute;
+            font-size: 30px;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        .icon-ship { top: 5%; left: 10%; font-size: 35px; transform: rotate(-10deg); }
+        .icon-compass { top: 5%; right: 10%; font-size: 40px; }
+        .icon-mountain { bottom: 15%; left: 5%; font-size: 45px; }
+        .icon-trees { bottom: 10%; right: 15%; font-size: 35px; }
+        .icon-treasure { bottom: 2%; left: 45%; font-size: 40px; animation: float 2s infinite ease-in-out;}
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .clue-card {
+            background: #fdf5e6;
+            border: 4px solid #8b5a2b;
+            border-radius: 16px;
+            padding: 20px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 5px 5px 0px rgba(139, 69, 19, 0.4);
+            position: relative;
+            transition: all 0.3s ease;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        .clue-card::before {
+            content: "📌";
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 28px;
+            filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.3));
+        }
+
+        .clue-card.found {
+            background: #e8f5e9;
+            border-color: #2ed573;
+        }
+
+        .clue-card.found::after {
+            content: "❌";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1.5);
+            font-size: 80px;
+            opacity: 0.8;
+            z-index: 3;
+        }
+
+        .clue-chinese {
+            font-family: 'Noto Sans SC', sans-serif;
+            font-size: 26px;
+            font-weight: bold;
+            color: #212121;
+            margin-bottom: 10px;
+        }
+
+        .clue-pinyin {
+            font-weight: 700;
+            color: #e53935;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .clue-meaning {
+            font-size: 15px;
+            color: #5d4037;
+            font-style: italic;
+        }
+
+        .map-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 90%;
+            margin-top: 20px;
+            z-index: 10;
+        }
+
+        .nav-btn {
+            background: #8b5a2b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 15px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #4e342e;
+            transition: all 0.1s;
+        }
+        .nav-btn:active { transform: translateY(3px); box-shadow: none; }
+        .nav-btn:hover { background: #a06933; }
+
+        .progress-text {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 20px;
+            color: #4e342e;
+            font-weight: bold;
+        }
+
+        /* ================= BẢNG MA TRẬN ================= */
+        .grid-panel {
+            flex: 1;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 4px solid #fff;
+            overflow: auto;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(14, 1fr);
+            gap: 5px;
+            background: #dfe4ea;
+            padding: 10px;
+            border-radius: 16px;
+        }
+
+        .cell {
+            width: 42px;
+            height: 42px;
+            background: var(--cell-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Noto Sans SC', sans-serif;
+            font-size: 22px;
+            font-weight: bold;
+            color: #2f3542;
+            cursor: pointer;
+            border-radius: 8px;
+            box-shadow: 0 3px 0px #ced6e0;
+            transition: all 0.1s;
+        }
+
+        .cell:hover { background: #ffecd2; }
+
+        .cell.selecting {
+            background: var(--highlight);
+            color: #fff;
+            box-shadow: 0 0 15px var(--highlight);
+            transform: scale(1.15);
+            z-index: 2;
+        }
+
+        .cell.found {
+            background: var(--found-bg);
+            color: var(--found-text);
+            box-shadow: 0 3px 0px #20bf6b;
+            animation: pop 0.3s ease;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .reset-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: bold;
+            font-size: 16px;
+            color: #fff;
+            background: #ff4757;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(255, 71, 87, 0.4);
+            transition: all 0.3s;
+            z-index: 20;
+        }
+        .reset-btn:hover { background: #ff6b81; transform: scale(1.05); }
+
+        #win-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .win-box {
+            background: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            border: 6px solid #ffb347;
+            animation: bounceIn 0.6s;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .win-box h2 { color: #ff4757; font-size: 32px; margin-top: 0; }
+        .win-box button {
+            margin-top: 20px; padding: 12px 25px; font-size: 18px; font-weight: bold;
+            background: #2ed573; color: white; border: none; border-radius: 30px; cursor: pointer;
+        }
+
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: scale(0.5); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @media (max-width: 900px) {
+            .game-container {
+                flex-direction: column;
+                overflow-y: auto;
+                height: auto;
+            }
+            .map-wrapper { flex: none; height: 350px; width: 100%; }
+            .grid-panel { overflow-x: auto; height: auto; }
+            .cell { width: 32px; height: 32px; font-size: 16px; }
+            body { overflow: auto; height: auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🏴‍☠️ Truy Tìm Kho Báu 🏴‍☠️</h1>
+        <div class="subtitle">Kéo chuột / vuốt, hoặc Bấm chữ đầu + Bấm chữ cuối để chọn!</div>
+    </header>
+
+    <div class="game-container">
+        <div class="map-wrapper">
+            <div class="map-panel">
+                <div class="map-icon icon-ship">⛵</div>
+                <div class="map-icon icon-compass">🧭</div>
+                <div class="map-icon icon-mountain">⛰️</div>
+                <div class="map-icon icon-trees">🌲🌲</div>
+                <div class="map-icon icon-treasure">💰</div>
+
+                <div class="clue-card" id="current-clue-card">
+                    <div class="clue-chinese" id="c-hanzi"></div>
+                    <div class="clue-pinyin" id="c-pinyin"></div>
+                    <div class="clue-meaning" id="c-meaning"></div>
+                </div>
+
+                <div class="map-nav">
+                    <button class="nav-btn" onclick="prevClue()">◀ Trước</button>
+                    <div class="progress-text" id="progress-text">1 / 8</div>
+                    <button class="nav-btn" onclick="nextClue()">Tiếp ▶</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-panel">
+            <div class="grid" id="grid"></div>
+        </div>
+    </div>
+
+    <button class="reset-btn" onclick="resetGame()">🔄 Chơi Lại</button>
+
+    <div id="win-overlay">
+        <div class="win-box">
+            <h2>🎉 Tuyệt Vời! 🎉</h2>
+            <p>Bạn đã tìm thấy toàn bộ kho báu!</p>
+            <button onclick="resetGame()">Chơi Lại Nào</button>
+        </div>
+    </div>
+
+    <script>
+        const gridData = [
+            "猫在椅子下面树花水果你好爸妈".split(""),
+            "爸妈树花水果你好不喝吃书在我".split(""),
+            "水我没有吃早饭花水果你好爸不".split(""),
+            "爸妈树花水果你好不喝吃书在买".split(""),
+            "昨好不喝吃书在有没我他她爸纪".split(""),
+            "天爸妈树花水果你好不喝吃书念".split(""),
+            "我水商店在学校左边花水果你品".split(""),
+            "没爸妈树花水果你好不喝吃书爸".split(""),
+            "有水我不太喜欢吃苹果树花书妈".split(""),
+            "做爸妈树花水果你好不喝吃在树".split(""),
+            "作水树汉语书在书架上花水书果".split(""),
+            "业爸妈树花水果你好不喝吃包花".split(""),
+            "水妈树花水果你好不喝吃书里爸".split(""),
+            "爸爸妈树花水果你好不喝吃面妈".split("")
+        ];
+
+        const answers = [
+            { id: 1, text: "猫在椅子下面", hanzi: "猫在椅子下面。", pinyin: "Māo zài yǐzi xiàmiàn.", meaning: "Con mèo ở dưới ghế.", r1: 0, c1: 0, r2: 0, c2: 5 },
+            { id: 2, text: "我不买纪念品", hanzi: "我不买纪念品。", pinyin: "Wǒ bù mǎi jìniànpǐn.", meaning: "Tôi không mua quà lưu niệm.", r1: 1, c1: 13, r2: 6, c2: 13 },
+            { id: 3, text: "我没有吃早饭", hanzi: "我没有吃早饭。", pinyin: "Wǒ méiyǒu chī zǎofàn.", meaning: "Tôi chưa ăn sáng.", r1: 2, c1: 1, r2: 2, c2: 6 },
+            { id: 4, text: "昨天我没有做作业", hanzi: "昨天我没有做作业。", pinyin: "Zuótiān wǒ méiyǒu zuò zuòyè.", meaning: "Hôm qua tôi không làm bài tập.", r1: 4, c1: 0, r2: 11, c2: 0 },
+            { id: 5, text: "商店在学校左边", hanzi: "商店在学校左边。", pinyin: "Shāngdiàn zài xuéxiào zuǒbiān.", meaning: "Cửa hàng ở bên trái trường học.", r1: 6, c1: 2, r2: 6, c2: 8 },
+            { id: 6, text: "我不太喜欢吃苹果", hanzi: "我不太喜欢吃苹果。", pinyin: "Wǒ bù tài xǐhuan chī píngguǒ.", meaning: "Tôi không thích ăn táo lắm.", r1: 8, c1: 2, r2: 8, c2: 9 },
+            { id: 7, text: "书在书包里面", hanzi: "书在书包里面。", pinyin: "Shū zài shūbāo lǐmiàn.", meaning: "Sách ở trong cặp sách.", r1: 8, c1: 12, r2: 13, c2: 12 },
+            { id: 8, text: "汉语书在书架上", hanzi: "汉语书在书架上。", pinyin: "Hànyǔ shū zài shūjià shàng.", meaning: "Sách tiếng Hán ở trên giá sách.", r1: 10, c1: 3, r2: 10, c2: 9 }
+        ];
+
+        let foundAnswers = [];
+        let currentClueIndex = 0;
+        
+        let isSelecting = false;
+        let isDragging = false;
+        let startR = -1, startC = -1;
+        let currentSelection = [];
+
+        function init() {
+            renderSingleClue();
+            renderGrid();
+        }
+
+        function renderSingleClue() {
+            const clue = answers[currentClueIndex];
+            const isFound = foundAnswers.includes(clue.id);
+            const card = document.getElementById('current-clue-card');
+
+            document.getElementById('c-hanzi').innerText = `${clue.id}. ${clue.hanzi}`;
+            document.getElementById('c-pinyin').innerText = clue.pinyin;
+            document.getElementById('c-meaning').innerText = clue.meaning;
+            
+            document.getElementById('progress-text').innerText = `${currentClueIndex + 1} / ${answers.length}`;
+
+            if (isFound) {
+                card.classList.add('found');
+            } else {
+                card.classList.remove('found');
+            }
+        }
+
+        function prevClue() {
+            if (currentClueIndex > 0) {
+                currentClueIndex--;
+                renderSingleClue();
+            }
+        }
+
+        function nextClue() {
+            if (currentClueIndex < answers.length - 1) {
+                currentClueIndex++;
+                renderSingleClue();
+            }
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            for (let r = 0; r < 14; r++) {
+                for (let c = 0; c < 14; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.textContent = gridData[r][c];
+                    cell.dataset.r = r;
+                    cell.dataset.c = c;
+                    cell.id = `cell-${r}-${c}`;
+
+                    // Sự kiện Chuột
+                    cell.addEventListener('mousedown', (e) => handleStart(r, c, e));
+                    cell.addEventListener('mouseenter', (e) => handleMove(r, c, e));
+                    
+                    // Sự kiện Cảm ứng (Điện thoại)
+                    cell.addEventListener('touchstart', (e) => { e.preventDefault(); handleStart(r, c, e); });
+                    cell.addEventListener('touchmove', (e) => handleTouchMove(e));
+
+                    grid.appendChild(cell);
+                }
+            }
+        }
+
+        // Xử lý khi bắt đầu bấm vào một ô
+        function handleStart(r, c, e) {
+            if (isCellFound(r, c)) return;
+            
+            if (!isSelecting) {
+                // Lần bấm đầu tiên: Bắt đầu chọn
+                isSelecting = true;
+                isDragging = true;
+                startR = r;
+                startC = c;
+                updateSelection(r, c);
+            } else {
+                // Lần bấm thứ 2: Chốt điểm cuối (dành cho kiểu Click-Click)
+                updateSelection(r, c);
+                evaluateSelection();
+            }
+        }
+
+        // Xử lý khi di chuột qua các ô khác (kéo thả)
+        function handleMove(r, c, e) {
+            if (!isSelecting || !isDragging) return;
+            if (isCellFound(r, c)) return;
+            if (r !== startR && c !== startC) return; 
+            updateSelection(r, c);
+        }
+
+        // Xử lý khi vuốt trên điện thoại
+        function handleTouchMove(e) {
+            if (!isSelecting || !isDragging) return;
+            const touch = e.touches[0];
+            const element = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (element && element.classList.contains('cell')) {
+                const r = parseInt(element.dataset.r);
+                const c = parseInt(element.dataset.c);
+                if (r === startR || c === startC) {
+                    updateSelection(r, c);
+                }
+            }
+        }
+
+        // Tô sáng các ô đang được chọn
+        function updateSelection(endR, endC) {
+            document.querySelectorAll('.cell.selecting').forEach(el => el.classList.remove('selecting'));
+            currentSelection = [];
+
+            const minR = Math.min(startR, endR);
+            const maxR = Math.max(startR, endR);
+            const minC = Math.min(startC, endC);
+            const maxC = Math.max(startC, endC);
+
+            for (let r = minR; r <= maxR; r++) {
+                for (let c = minC; c <= maxC; c++) {
+                    const cell = document.getElementById(`cell-${r}-${c}`);
+                    if (cell && !cell.classList.contains('found')) {
+                        cell.classList.add('selecting');
+                        currentSelection.push({ r, c, char: gridData[r][c] });
+                    }
+                }
+            }
+        }
+
+        // Xử lý khi nhả chuột / nhấc tay
+        function handleEnd() {
+            if (!isSelecting) return;
+            if (isDragging) {
+                isDragging = false;
+                // Nếu kéo được nhiều hơn 1 ô thì chốt luôn
+                if (currentSelection.length > 1) {
+                    evaluateSelection();
+                }
+            }
+        }
+
+        // Kiểm tra xem chuỗi chữ vừa chọn có đúng không
+        function evaluateSelection() {
+            if (currentSelection.length === 0) return;
+
+            const selectedText = currentSelection.map(item => item.char).join('');
+            const reversedText = selectedText.split('').reverse().join('');
+
+            let matchIndex = answers.findIndex(ans => 
+                !foundAnswers.includes(ans.id) && 
+                (ans.text === selectedText || ans.text === reversedText)
+            );
+
+            if (matchIndex !== -1) {
+                let match = answers[matchIndex];
+                foundAnswers.push(match.id);
+                currentSelection.forEach(item => {
+                    const cell = document.getElementById(`cell-${item.r}-${item.c}`);
+                    cell.classList.remove('selecting');
+                    cell.classList.add('found');
+                });
+
+                // Tự động nhảy sang câu tiếp theo chưa giải
+                let nextUnsolvedIndex = answers.findIndex(ans => !foundAnswers.includes(ans.id));
+                if (nextUnsolvedIndex !== -1) {
+                    currentClueIndex = nextUnsolvedIndex;
+                } else {
+                    currentClueIndex = matchIndex; 
+                    document.getElementById('win-overlay').style.display = 'flex';
+                }
+                
+                renderSingleClue();
+            } else {
+                currentSelection.forEach(item => {
+                    const cell = document.getElementById(`cell-${item.r}-${item.c}`);
+                    cell.classList.remove('selecting');
+                });
+            }
+            
+            // Reset trạng thái chọn
+            currentSelection = [];
+            isSelecting = false;
+            isDragging = false;
+        }
+
+        function isCellFound(r, c) {
+            return document.getElementById(`cell-${r}-${c}`).classList.contains('found');
+        }
+
+        function resetGame() {
+            foundAnswers = [];
+            currentClueIndex = 0;
+            isSelecting = false;
+            isDragging = false;
+            currentSelection = [];
+            document.getElementById('win-overlay').style.display = 'none';
+            renderSingleClue();
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.classList.remove('found', 'selecting');
+            });
+        }
+
+        window.addEventListener('mouseup', handleEnd);
+        window.addEventListener('touchend', handleEnd);
+
+        init();
+    </script>
+</body>
+</html>
