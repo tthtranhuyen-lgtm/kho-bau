@@ -78,6 +78,7 @@
             margin: 0 auto;
             width: 100%;
             overflow: hidden;
+            position: relative;
         }
 
         /* ================= BẢN ĐỒ KHO BÁU ================= */
@@ -88,6 +89,12 @@
             filter: drop-shadow(5px 10px 15px rgba(0,0,0,0.3));
             display: flex;
             flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        /* Class để ẩn bản đồ */
+        .map-wrapper.hidden {
+            display: none;
         }
 
         .map-panel {
@@ -258,7 +265,29 @@
             overflow: auto; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             border: 4px solid #fff;
+            position: relative;
         }
+
+        /* Nút Ẩn/Hiện Bản Đồ */
+        .toggle-map-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #0984e3;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 12px;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #074b82;
+            z-index: 20;
+            transition: all 0.1s;
+        }
+        .toggle-map-btn:active { transform: translateY(3px); box-shadow: none; }
+        .toggle-map-btn:hover { background: #74b9ff; }
 
         .grid {
             display: grid;
@@ -267,7 +296,7 @@
             background: #dfe4ea;
             padding: 10px;
             border-radius: 16px;
-            margin: 0 auto;
+            margin: 40px auto 0 auto; /* Tạo khoảng trống trên cho nút Toggle */
             width: fit-content;
         }
 
@@ -373,7 +402,8 @@
     </header>
 
     <div class="game-container">
-        <div class="map-wrapper">
+        <!-- BẢN ĐỒ KHO BÁU -->
+        <div class="map-wrapper" id="map-wrapper">
             <div class="map-panel">
                 <div class="map-icon icon-ship">⛵</div>
                 <div class="map-icon icon-compass">🧭</div>
@@ -397,7 +427,10 @@
             </div>
         </div>
 
+        <!-- BẢNG MA TRẬN -->
         <div class="grid-panel" id="grid-panel">
+            <!-- Nút ẩn/hiện bản đồ -->
+            <button class="toggle-map-btn" id="toggle-map-btn" onclick="toggleMap()">👁️ Ẩn Bản Đồ</button>
             <div class="grid" id="grid"></div>
         </div>
     </div>
@@ -411,39 +444,38 @@
     </div>
 
     <script>
-        // Ma trận 16x16 - Đã được thiết kế lại với đầy đủ hướng Ngang, Dọc, Chéo
+        // Ma trận 16x16
         const gridData = [
-            "今爸树花水果你好书在吃喝买卖起妈".split(""),
-            "妈天树我这些桌子都是我家的果床花".split(""),
-            "这爸早花喜果你好书在吃喝买卖以妈".split(""),
-            "妈些树上水欢你好书在吃喝买卖后花".split(""),
-            "树爸椅花我果喝好书在吃喝话卖我妈".split(""),
-            "妈爸树子水去你越书在吃喝电卖去花".split(""),
-            "树爸树花都果买好南家吃喝打卖刷妈".split(""),
-            "妈爸树花水不你一白吃喝友卖牙花".split(""),
-            "树爸树花水果是我公在咖喝朋卖洗妈".split(""),
-            "妈爸树花水果半我书斤吃啡女卖脸花".split(""),
-            "树爸树花水点你好家在苹喝给卖人妈".split(""),
-            "妈爸树花八果你好书的吃果我卖口花".split(""),
-            "树爸树上芒果一公斤多少钱上卖四妈".split(""),
-            "妈爸晚花我喜欢吃香蕉书在晚卖有花".split(""),
-            "树天今天中午我在家吃午饭天卖家妈".split(""),
-            "昨爸树花水果你好书在吃喝今卖我花".split("")
+            "今花水树爸妈树花水果你好爸妈树花".split(""),
+            "这天花这些桌子都是我家的树花水果".split(""),
+            "些花早花水果今天中午我在家吃午饭".split(""),
+            "椅花花上水果爸妈树花水果你好起花".split(""),
+            "子花水花我果你好爸妈树花水果床话".split(""),
+            "都水果你好去爸妈树花水果你好以电".split(""),
+            "不爸妈树花水买果你家好不喝吃后打".split(""),
+            "是爸妈树花水果一回你好不喝吃我友".split(""),
+            "我爸妈树花水果我公你好不喝吃去朋".split(""),
+            "家爸妈树花水半果你斤好不喝吃刷女".split(""),
+            "的爸妈树花点水果你好苹不喝吃牙给".split(""),
+            "花爸妈树八花水果你好不果喝吃洗我".split(""),
+            "树花水上芒果一公斤多少钱你好脸上".split(""),
+            "爸妈我喜欢喝越南白咖啡花水果你晚".split(""),
+            "水天我家有四口人树花水果你好爸天".split(""),
+            "昨花我喜欢吃香蕉爸妈树花水果你今".split("")
         ];
 
-        // Cập nhật lại tọa độ (r1, c1, r2, c2) khớp với ma trận mới
         const originalAnswers = [
-            { id: 1, text: "今天早上我去买一公斤苹果", hanzi: "今天早上我去买一公斤苹果。", pinyin: "Jīntiān zǎoshang wǒ qù mǎi yī gōngjīn píngguǒ.", meaning: "Sáng nay tôi đi mua 1kg táo.", r1: 0, c1: 0, r2: 11, c2: 11 }, // Chéo xuống phải
-            { id: 2, text: "昨天晚上八点半我回家", hanzi: "昨天晚上八点半我回家。", pinyin: "Zuótiān wǎnshang bā diǎn bàn wǒ huí jiā.", meaning: "Tối qua 8h30 tôi về nhà.", r1: 15, c1: 0, r2: 6, c2: 9 }, // Chéo lên phải
-            { id: 3, text: "芒果一公斤多少钱", hanzi: "芒果一公斤多少钱？", pinyin: "Mángguǒ yī gōngjīn duōshao qián?", meaning: "Xoài 1kg bao nhiêu tiền?", r1: 12, c1: 4, r2: 12, c2: 11 }, // Ngang
-            { id: 4, text: "这些桌子都是我家的", hanzi: "这些桌子都是我家的。", pinyin: "Zhèxiē zhuōzi dōu shì wǒ jiā de.", meaning: "Những cái bàn này đều là của nhà tôi.", r1: 1, c1: 4, r2: 1, c2: 12 }, // Ngang
-            { id: 5, text: "今天晚上我给女朋友打电话", hanzi: "今天晚上我给女朋友打电话。", pinyin: "Jīntiān wǎnshang wǒ gěi nǚpéngyou dǎ diànhuà.", meaning: "Tối nay tôi gọi điện cho bạn gái.", r1: 15, c1: 12, r2: 4, c2: 12 }, // Dọc lên
-            { id: 6, text: "今天中午我在家吃午饭", hanzi: "今天中午我在家吃午饭。", pinyin: "Jīntiān zhōngwǔ wǒ zài jiā chī wǔfàn.", meaning: "Trưa nay tôi ăn cơm ở nhà.", r1: 14, c1: 2, r2: 14, c2: 11 }, // Ngang
-            { id: 7, text: "这些椅子都不是我家的", hanzi: "这些椅子都不是我家的。", pinyin: "Zhèxiē yǐzi dōu bù shì wǒ jiā de.", meaning: "Những cái ghế này đều không phải của nhà tôi.", r1: 2, c1: 0, r2: 11, c2: 9 }, // Chéo xuống phải
-            { id: 8, text: "起床以后我去刷牙洗脸", hanzi: "起床以后我去刷牙洗脸。", pinyin: "Qǐchuáng yǐhòu wǒ qù shuāyá xǐliǎn.", meaning: "Sau khi thức dậy tôi đi đánh răng rửa mặt.", r1: 0, c1: 14, r2: 9, c2: 14 }, // Dọc xuống
-            { id: 9, text: "我家有四口人", hanzi: "我家有四口人。", pinyin: "Wǒ jiā yǒu sì kǒu rén.", meaning: "Nhà tôi có 4 người.", r1: 15, c1: 14, r2: 10, c2: 14 }, // Dọc lên
-            { id: 10, text: "我喜欢吃香蕉", hanzi: "我喜欢吃香蕉。", pinyin: "Wǒ xǐhuan chī xiāngjiāo.", meaning: "Tôi thích ăn chuối.", r1: 13, c1: 4, r2: 13, c2: 9 }, // Ngang
-            { id: 11, text: "我喜欢喝越南白咖啡", hanzi: "我喜欢喝越南白咖啡。", pinyin: "Wǒ xǐhuan hē Yuènán bái kāfēi.", meaning: "Tôi thích uống cà phê trắng Việt Nam.", r1: 1, c1: 3, r2: 9, c2: 11 } // Chéo xuống phải
+            { id: 1, text: "今天早上我去买一公斤苹果", hanzi: "今天早上我去买一公斤苹果。", pinyin: "Jīntiān zǎoshang wǒ qù mǎi yī gōngjīn píngguǒ.", meaning: "Sáng nay tôi đi mua 1kg táo.", r1: 0, c1: 0, r2: 11, c2: 11 },
+            { id: 2, text: "昨天晚上八点半我回家", hanzi: "昨天晚上八点半我回家。", pinyin: "Zuótiān wǎnshang bā diǎn bàn wǒ huí jiā.", meaning: "Tối qua 8h30 tôi về nhà.", r1: 15, c1: 0, r2: 6, c2: 9 },
+            { id: 3, text: "芒果一公斤多少钱", hanzi: "芒果一公斤多少钱？", pinyin: "Mángguǒ yī gōngjīn duōshao qián?", meaning: "Xoài 1kg bao nhiêu tiền?", r1: 12, c1: 4, r2: 12, c2: 11 },
+            { id: 4, text: "这些桌子都是我家的", hanzi: "这些桌子都是我家的。", pinyin: "Zhèxiē zhuōzi dōu shì wǒ jiā de.", meaning: "Những cái bàn này đều là của nhà tôi.", r1: 1, c1: 3, r2: 1, c2: 11 },
+            { id: 5, text: "今天晚上我给女朋友打电话", hanzi: "今天晚上我给女朋友打电话。", pinyin: "Jīntiān wǎnshang wǒ gěi nǚpéngyou dǎ diànhuà.", meaning: "Tối nay tôi gọi điện cho bạn gái.", r1: 15, c1: 15, r2: 4, c2: 15 },
+            { id: 6, text: "今天中午我在家吃午饭", hanzi: "今天中午我在家吃午饭。", pinyin: "Jīntiān zhōngwǔ wǒ zài jiā chī wǔfàn.", meaning: "Trưa nay tôi ăn cơm ở nhà.", r1: 2, c1: 6, r2: 2, c2: 15 },
+            { id: 7, text: "这些椅子都不是我家的", hanzi: "这些椅子都不是我家的。", pinyin: "Zhèxiē yǐzi dōu bù shì wǒ jiā de.", meaning: "Những cái ghế này đều không phải của nhà tôi.", r1: 1, c1: 0, r2: 10, c2: 0 },
+            { id: 8, text: "起床以后我去刷牙洗脸", hanzi: "起床以后我去刷牙洗脸。", pinyin: "Qǐchuáng yǐhòu wǒ qù shuāyá xǐliǎn.", meaning: "Sau khi thức dậy tôi đi đánh răng rửa mặt.", r1: 3, c1: 14, r2: 12, c2: 14 },
+            { id: 9, text: "我家有四口人", hanzi: "我家有四口人。", pinyin: "Wǒ jiā yǒu sì kǒu rén.", meaning: "Nhà tôi có 4 người.", r1: 14, c1: 2, r2: 14, c2: 7 },
+            { id: 10, text: "我喜欢吃香蕉", hanzi: "我喜欢吃香蕉。", pinyin: "Wǒ xǐhuan chī xiāngjiāo.", meaning: "Tôi thích ăn chuối.", r1: 15, c1: 2, r2: 15, c2: 7 },
+            { id: 11, text: "我喜欢喝越南白咖啡", hanzi: "我喜欢喝越南白咖啡。", pinyin: "Wǒ xǐhuan hē Yuènán bái kāfēi.", meaning: "Tôi thích uống cà phê trắng Việt Nam.", r1: 13, c1: 2, r2: 13, c2: 10 }
         ];
 
         let answers = []; 
@@ -471,6 +503,24 @@
             answers = shuffleArray([...originalAnswers]);
             renderSingleClue();
             renderGrid();
+        }
+
+        // Hàm Ẩn / Hiện Bản Đồ
+        function toggleMap() {
+            const mapWrapper = document.getElementById('map-wrapper');
+            const toggleBtn = document.getElementById('toggle-map-btn');
+            
+            mapWrapper.classList.toggle('hidden');
+            
+            if (mapWrapper.classList.contains('hidden')) {
+                toggleBtn.innerText = '👁️ Hiện Bản Đồ';
+                toggleBtn.style.background = '#ff4757'; // Đổi màu đỏ khi đang ẩn
+                toggleBtn.style.boxShadow = '0 3px 0 #c0392b';
+            } else {
+                toggleBtn.innerText = '👁️ Ẩn Bản Đồ';
+                toggleBtn.style.background = '#0984e3'; // Trả lại màu xanh
+                toggleBtn.style.boxShadow = '0 3px 0 #074b82';
+            }
         }
 
         function renderSingleClue() {
@@ -549,7 +599,6 @@
             
             const dr = r - startR;
             const dc = c - startC;
-            // Chỉ cho phép Ngang, Dọc, hoặc Chéo (trị tuyệt đối dr bằng trị tuyệt đối dc)
             if (dr !== 0 && dc !== 0 && Math.abs(dr) !== Math.abs(dc)) return; 
             
             updateSelection(r, c);
@@ -570,7 +619,6 @@
             }
         }
 
-        // Hàm nội suy chọn các ô trên đường thẳng
         function updateSelection(endR, endC) {
             document.querySelectorAll('.cell.selecting').forEach(el => el.classList.remove('selecting'));
             currentSelection = [];
@@ -578,7 +626,6 @@
             const dr = endR - startR;
             const dc = endC - startC;
             
-            // Kiểm tra hợp lệ
             if (dr !== 0 && dc !== 0 && Math.abs(dr) !== Math.abs(dc)) return;
 
             const steps = Math.max(Math.abs(dr), Math.abs(dc));
@@ -596,7 +643,6 @@
                     cell.classList.add('selecting');
                     currentSelection.push({ r, c, char: gridData[r][c] });
                 } else if (cell && cell.classList.contains('found')) {
-                    // Nếu đi ngang qua ô đã tìm thấy, dừng vùng chọn
                     break;
                 }
             }
