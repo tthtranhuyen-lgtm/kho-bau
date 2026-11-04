@@ -198,7 +198,6 @@
             font-style: italic;
         }
 
-        /* Thanh điều hướng câu hỏi */
         .map-nav {
             display: flex;
             justify-content: space-between;
@@ -230,7 +229,6 @@
             font-weight: bold;
         }
 
-        /* Nút Chơi Lại đã được đưa vào trong khung bản đồ */
         .reset-btn {
             margin-top: 20px;
             padding: 8px 25px;
@@ -321,7 +319,6 @@
         }
         .shake-effect { animation: shake 0.4s ease; }
 
-        /* Modal chiến thắng */
         #win-overlay {
             display: none;
             position: fixed;
@@ -396,7 +393,6 @@
                     <button class="nav-btn" onclick="nextClue()">Tiếp ▶</button>
                 </div>
 
-                <!-- Nút chơi lại đã được đưa vào đây -->
                 <button class="reset-btn" onclick="resetGame()">🔄 Chơi Lại</button>
             </div>
         </div>
@@ -415,40 +411,42 @@
     </div>
 
     <script>
-        // Ma trận 16x16
+        // Ma trận 16x16 đã được xáo trộn ngang dọc, các chữ không còn xếp hàng dễ thấy
         const gridData = [
-            "今天早上我去买一公斤苹果爸妈树花".split(""),
-            "昨天晚上八点半我回家水果你好书在".split(""),
-            "芒果一公斤多少钱爸妈树花水果你好".split(""),
-            "这些桌子都是我家的书在吃喝买卖花".split(""),
-            "今天晚上我给女朋友打电话树花水果你".split(""),
-            "今天中午我在家吃午饭爸妈你好书在".split(""),
-            "这些椅子都不是我家的水果树花爸妈".split(""),
-            "起床以后我去刷牙洗脸妈爸你好果树".split(""),
-            "我我树花水果你好爸妈树花水果爸妈".split(""),
-            "家喜花水果你好爸妈树花水果你好爸".split(""),
-            "有欢果你好爸妈树花水果你好爸妈树".split(""),
-            "四吃你好爸妈树花水果你好爸妈树花".split(""),
-            "口香好爸妈树花水果你好爸妈树花水".split(""),
-            "人蕉爸妈树花水果你好爸妈树花水果".split(""),
-            "我喜欢喝越南白咖啡树花水果你好爸".split(""),
-            "树花水果你好爸妈树花水果你好爸妈".split("")
+            "今爸妈树花水果你好书在吃喝买今妈".split(""),
+            "天爸妈今天中午我在家吃午饭爸天妈".split(""),
+            "早爸芒树花水果你好书在吃喝买晚妈".split(""),
+            "上爸果树花水果你好书在吃喝买上妈".split(""),
+            "我爸一树这些椅子都不是我家的我妈".split(""),
+            "去爸公树花水果你好书在吃喝买给妈".split(""),
+            "买家斤树花起果你好书在吃喝买女妈".split(""),
+            "一回多树花床果你好书在吃喝买朋妈".split(""),
+            "公我少树花以我家有四口人喝买友妈".split(""),
+            "斤半钱树花后果你好书在吃喝买打妈".split(""),
+            "苹八树花水我我喜欢吃香蕉喝买电妈".split(""),
+            "果上树花水去果你好书在吃喝买话妈".split(""),
+            "爸晚树花水刷我喜欢喝越南白咖啡妈".split(""),
+            "妈天树花水牙果你好书在吃喝买卖妈".split(""),
+            "树昨树花水这些桌子都是我家的卖妈".split(""),
+            "花天树天水脸果你好书在吃喝买卖妈".split("")
         ];
 
-        const answers = [
-            { id: 1, text: "今天早上我去买一公斤苹果", hanzi: "今天早上我去买一公斤苹果。", pinyin: "Jīntiān zǎoshang wǒ qù mǎi yī gōngjīn píngguǒ.", meaning: "Sáng nay tôi đi mua 1kg táo.", r1: 0, c1: 0, r2: 0, c2: 11 },
-            { id: 2, text: "昨天晚上八点半我回家", hanzi: "昨天晚上八点半我回家。", pinyin: "Zuótiān wǎnshang bā diǎn bàn wǒ huí jiā.", meaning: "Tối qua 8h30 tôi về nhà.", r1: 1, c1: 0, r2: 1, c2: 9 },
-            { id: 3, text: "芒果一公斤多少钱", hanzi: "芒果一公斤多少钱？", pinyin: "Mángguǒ yī gōngjīn duōshao qián?", meaning: "Xoài 1kg bao nhiêu tiền?", r1: 2, c1: 0, r2: 2, c2: 7 },
-            { id: 4, text: "这些桌子都是我家的", hanzi: "这些桌子都是我家的。", pinyin: "Zhèxiē zhuōzi dōu shì wǒ jiā de.", meaning: "Những cái bàn này đều là của nhà tôi.", r1: 3, c1: 0, r2: 3, c2: 8 },
-            { id: 5, text: "今天晚上我给女朋友打电话", hanzi: "今天晚上我给女朋友打电话。", pinyin: "Jīntiān wǎnshang wǒ gěi nǚpéngyou dǎ diànhuà.", meaning: "Tối nay tôi gọi điện cho bạn gái.", r1: 4, c1: 0, r2: 4, c2: 11 },
-            { id: 6, text: "今天中午我在家吃午饭", hanzi: "今天中午我在家吃午饭。", pinyin: "Jīntiān zhōngwǔ wǒ zài jiā chī wǔfàn.", meaning: "Trưa nay tôi ăn cơm ở nhà.", r1: 5, c1: 0, r2: 5, c2: 9 },
-            { id: 7, text: "这些椅子都不是我家的", hanzi: "这些椅子都不是我家的。", pinyin: "Zhèxiē yǐzi dōu bù shì wǒ jiā de.", meaning: "Những cái ghế này đều không phải của nhà tôi.", r1: 6, c1: 0, r2: 6, c2: 9 },
-            { id: 8, text: "起床以后我去刷牙洗脸", hanzi: "起床以后我去刷牙洗脸。", pinyin: "Qǐchuáng yǐhòu wǒ qù shuāyá xǐliǎn.", meaning: "Sau khi thức dậy tôi đi đánh răng rửa mặt.", r1: 7, c1: 0, r2: 7, c2: 9 },
-            { id: 9, text: "我家有四口人", hanzi: "我家有四口人。", pinyin: "Wǒ jiā yǒu sì kǒu rén.", meaning: "Nhà tôi có 4 người.", r1: 8, c1: 0, r2: 13, c2: 0 },
-            { id: 10, text: "我喜欢吃香蕉", hanzi: "我喜欢吃香蕉。", pinyin: "Wǒ xǐhuan chī xiāngjiāo.", meaning: "Tôi thích ăn chuối.", r1: 8, c1: 1, r2: 13, c2: 1 },
-            { id: 11, text: "我喜欢喝越南白咖啡", hanzi: "我喜欢喝越南白咖啡。", pinyin: "Wǒ xǐhuan hē Yuènán bái kāfēi.", meaning: "Tôi thích uống cà phê trắng Việt Nam.", r1: 14, c1: 0, r2: 14, c2: 8 }
+        // Danh sách câu trả lời (Cập nhật lại tọa độ cho đúng với ma trận mới)
+        const originalAnswers = [
+            { id: 1, text: "今天早上我去买一公斤苹果", hanzi: "今天早上我去买一公斤苹果。", pinyin: "Jīntiān zǎoshang wǒ qù mǎi yī gōngjīn píngguǒ.", meaning: "Sáng nay tôi đi mua 1kg táo.", r1: 0, c1: 0, r2: 11, c2: 0 },
+            { id: 2, text: "昨天晚上八点半我回家", hanzi: "昨天晚上八点半我回家。", pinyin: "Zuótiān wǎnshang bā diǎn bàn wǒ huí jiā.", meaning: "Tối qua 8h30 tôi về nhà.", r1: 15, c1: 1, r2: 6, c2: 1 }, // Đọc từ dưới lên
+            { id: 3, text: "芒果一公斤多少钱", hanzi: "芒果一公斤多少钱？", pinyin: "Mángguǒ yī gōngjīn duōshao qián?", meaning: "Xoài 1kg bao nhiêu tiền?", r1: 2, c1: 2, r2: 9, c2: 2 },
+            { id: 4, text: "这些桌子都是我家的", hanzi: "这些桌子都是我家的。", pinyin: "Zhèxiē zhuōzi dōu shì wǒ jiā de.", meaning: "Những cái bàn này đều là của nhà tôi.", r1: 14, c1: 5, r2: 14, c2: 13 },
+            { id: 5, text: "今天晚上我给女朋友打电话", hanzi: "今天晚上我给女朋友打电话。", pinyin: "Jīntiān wǎnshang wǒ gěi nǚpéngyou dǎ diànhuà.", meaning: "Tối nay tôi gọi điện cho bạn gái.", r1: 0, c1: 14, r2: 11, c2: 14 },
+            { id: 6, text: "今天中午我在家吃午饭", hanzi: "今天中午我在家吃午饭。", pinyin: "Jīntiān zhōngwǔ wǒ zài jiā chī wǔfàn.", meaning: "Trưa nay tôi ăn cơm ở nhà.", r1: 1, c1: 3, r2: 1, c2: 12 },
+            { id: 7, text: "这些椅子都不是我家的", hanzi: "这些椅子都不是我家的。", pinyin: "Zhèxiē yǐzi dōu bù shì wǒ jiā de.", meaning: "Những cái ghế này đều không phải của nhà tôi.", r1: 4, c1: 4, r2: 4, c2: 13 },
+            { id: 8, text: "起床以后我去刷牙洗脸", hanzi: "起床以后我去刷牙洗脸。", pinyin: "Qǐchuáng yǐhòu wǒ qù shuāyá xǐliǎn.", meaning: "Sau khi thức dậy tôi đi đánh răng rửa mặt.", r1: 6, c1: 5, r2: 15, c2: 5 },
+            { id: 9, text: "我家有四口人", hanzi: "我家有四口人。", pinyin: "Wǒ jiā yǒu sì kǒu rén.", meaning: "Nhà tôi có 4 người.", r1: 8, c1: 6, r2: 8, c2: 11 },
+            { id: 10, text: "我喜欢吃香蕉", hanzi: "我喜欢吃香蕉。", pinyin: "Wǒ xǐhuan chī xiāngjiāo.", meaning: "Tôi thích ăn chuối.", r1: 10, c1: 6, r2: 10, c2: 11 },
+            { id: 11, text: "我喜欢喝越南白咖啡", hanzi: "我喜欢喝越南白咖啡。", pinyin: "Wǒ xǐhuan hē Yuènán bái kāfēi.", meaning: "Tôi thích uống cà phê trắng Việt Nam.", r1: 12, c1: 6, r2: 12, c2: 14 }
         ];
 
+        let answers = []; 
         let foundAnswers = [];
         let currentClueIndex = 0;
         
@@ -459,7 +457,18 @@
 
         const confettiSettings = { particleCount: 80, spread: 70, origin: { y: 0.6 }, colors: ['#ff4757', '#ffa502', '#2ed573', '#1e90ff', '#ff9ff3'] };
 
+        function shuffleArray(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
         function init() {
+            answers = shuffleArray([...originalAnswers]);
             renderSingleClue();
             renderGrid();
         }
@@ -469,7 +478,7 @@
             const isFound = foundAnswers.includes(clue.id);
             const card = document.getElementById('current-clue-card');
 
-            document.getElementById('c-hanzi').innerText = `${clue.id}. ${clue.hanzi}`;
+            document.getElementById('c-hanzi').innerText = `${currentClueIndex + 1}. ${clue.hanzi}`;
             document.getElementById('c-pinyin').innerText = clue.pinyin;
             document.getElementById('c-meaning').innerText = clue.meaning;
             
@@ -596,7 +605,6 @@
             );
 
             if (matchIndex !== -1) {
-                // CHỌN ĐÚNG
                 let match = answers[matchIndex];
                 foundAnswers.push(match.id);
                 
@@ -613,6 +621,7 @@
                 }, 400);
 
                 let nextUnsolvedIndex = answers.findIndex(ans => !foundAnswers.includes(ans.id));
+                
                 if (nextUnsolvedIndex !== -1) {
                     currentClueIndex = nextUnsolvedIndex;
                 } else {
@@ -631,7 +640,6 @@
                 
                 renderSingleClue();
             } else {
-                // CHỌN SAI
                 currentSelection.forEach(item => {
                     const cell = document.getElementById(`cell-${item.r}-${item.c}`);
                     cell.classList.remove('selecting');
@@ -653,6 +661,9 @@
             isSelecting = false;
             isDragging = false;
             currentSelection = [];
+            
+            answers = shuffleArray([...originalAnswers]);
+            
             document.getElementById('win-overlay').style.display = 'none';
             renderSingleClue();
             document.querySelectorAll('.cell').forEach(cell => {
