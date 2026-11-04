@@ -46,7 +46,7 @@
             backdrop-filter: blur(5px);
             border-bottom: 4px dashed #ff8a5c;
             z-index: 10;
-            flex-shrink: 0; /* Ngăn header bị co lại */
+            flex-shrink: 0;
         }
 
         h1 {
@@ -77,7 +77,7 @@
             max-width: 1400px;
             margin: 0 auto;
             width: 100%;
-            overflow: hidden; /* Ngăn cuộn toàn trang */
+            overflow: hidden;
         }
 
         /* ================= BẢN ĐỒ KHO BÁU ================= */
@@ -177,25 +177,28 @@
 
         .clue-chinese {
             font-family: 'Noto Sans SC', sans-serif;
-            font-size: 26px;
+            font-size: 22px;
             font-weight: bold;
             color: #212121;
             margin-bottom: 10px;
+            line-height: 1.4;
         }
 
         .clue-pinyin {
             font-weight: 700;
             color: #e53935;
-            font-size: 16px;
+            font-size: 15px;
             margin-bottom: 5px;
+            line-height: 1.4;
         }
 
         .clue-meaning {
-            font-size: 15px;
+            font-size: 14px;
             color: #5d4037;
             font-style: italic;
         }
 
+        /* Thanh điều hướng câu hỏi */
         .map-nav {
             display: flex;
             justify-content: space-between;
@@ -227,6 +230,25 @@
             font-weight: bold;
         }
 
+        /* Nút Chơi Lại đã được đưa vào trong khung bản đồ */
+        .reset-btn {
+            margin-top: 20px;
+            padding: 8px 25px;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: bold;
+            font-size: 15px;
+            color: #fff;
+            background: #ff4757;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #c0392b;
+            transition: all 0.1s;
+            z-index: 10;
+        }
+        .reset-btn:active { transform: translateY(3px); box-shadow: none; }
+        .reset-btn:hover { background: #ff6b81; }
+
         /* ================= BẢNG MA TRẬN ================= */
         .grid-panel {
             flex: 1;
@@ -235,7 +257,6 @@
             backdrop-filter: blur(10px);
             border-radius: 24px;
             padding: 15px;
-            /* Sửa lỗi che chữ: Dùng block thay vì flex center */
             overflow: auto; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             border: 4px solid #fff;
@@ -243,30 +264,29 @@
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(14, 1fr);
-            gap: 4px;
+            grid-template-columns: repeat(16, 1fr);
+            gap: 3px;
             background: #dfe4ea;
             padding: 10px;
             border-radius: 16px;
-            /* Căn giữa bảng chữ mà không bị cắt phần trên */
             margin: 0 auto;
             width: fit-content;
         }
 
         .cell {
-            width: 38px; /* Thu nhỏ ô chữ một chút để vừa màn hình */
-            height: 38px;
+            width: 34px;
+            height: 34px;
             background: var(--cell-bg);
             display: flex;
             justify-content: center;
             align-items: center;
             font-family: 'Noto Sans SC', sans-serif;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
             color: #2f3542;
             cursor: pointer;
             border-radius: 6px;
-            box-shadow: 0 3px 0px #ced6e0;
+            box-shadow: 0 2px 0px #ced6e0;
             transition: all 0.1s;
         }
 
@@ -275,7 +295,7 @@
         .cell.selecting {
             background: var(--highlight);
             color: #fff;
-            box-shadow: 0 0 15px var(--highlight);
+            box-shadow: 0 0 10px var(--highlight);
             transform: scale(1.15);
             z-index: 2;
         }
@@ -283,7 +303,7 @@
         .cell.found {
             background: var(--found-bg);
             color: var(--found-text);
-            box-shadow: 0 3px 0px #20bf6b;
+            box-shadow: 0 2px 0px #20bf6b;
             animation: pop 0.4s ease;
         }
 
@@ -293,7 +313,6 @@
             100% { transform: scale(1) rotate(0); }
         }
 
-        /* Hiệu ứng rung khi chọn đúng */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-5px); }
@@ -302,26 +321,7 @@
         }
         .shake-effect { animation: shake 0.4s ease; }
 
-        /* Các nút điều khiển */
-        .reset-btn {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            padding: 10px 20px;
-            font-family: 'Quicksand', sans-serif;
-            font-weight: bold;
-            font-size: 16px;
-            color: #fff;
-            background: #ff4757;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(255, 71, 87, 0.4);
-            transition: all 0.3s;
-            z-index: 20;
-        }
-        .reset-btn:hover { background: #ff6b81; transform: scale(1.05); }
-
+        /* Modal chiến thắng */
         #win-overlay {
             display: none;
             position: fixed;
@@ -348,6 +348,7 @@
             margin-top: 20px; padding: 12px 25px; font-size: 18px; font-weight: bold;
             background: #2ed573; color: white; border: none; border-radius: 30px; cursor: pointer;
         }
+        .win-box button:active { transform: scale(0.95); }
 
         @keyframes bounceIn {
             0% { opacity: 0; transform: scale(0.5); }
@@ -360,9 +361,9 @@
                 overflow-y: auto;
                 height: auto;
             }
-            .map-wrapper { flex: none; height: 350px; width: 100%; }
+            .map-wrapper { flex: none; height: 380px; width: 100%; }
             .grid-panel { padding: 10px; }
-            .cell { width: 32px; height: 32px; font-size: 16px; }
+            .cell { width: 28px; height: 28px; font-size: 15px; }
             body { overflow: auto; height: auto; }
         }
     </style>
@@ -391,9 +392,12 @@
 
                 <div class="map-nav">
                     <button class="nav-btn" onclick="prevClue()">◀ Trước</button>
-                    <div class="progress-text" id="progress-text">1 / 8</div>
+                    <div class="progress-text" id="progress-text">1 / 11</div>
                     <button class="nav-btn" onclick="nextClue()">Tiếp ▶</button>
                 </div>
+
+                <!-- Nút chơi lại đã được đưa vào đây -->
+                <button class="reset-btn" onclick="resetGame()">🔄 Chơi Lại</button>
             </div>
         </div>
 
@@ -401,8 +405,6 @@
             <div class="grid" id="grid"></div>
         </div>
     </div>
-
-    <button class="reset-btn" onclick="resetGame()">🔄 Chơi Lại</button>
 
     <div id="win-overlay">
         <div class="win-box">
@@ -413,32 +415,38 @@
     </div>
 
     <script>
+        // Ma trận 16x16
         const gridData = [
-            "猫在椅子下面树花水果你好爸妈".split(""),
-            "爸妈树花水果你好不喝吃书在我".split(""),
-            "水我没有吃早饭花水果你好爸不".split(""),
-            "爸妈树花水果你好不喝吃书在买".split(""),
-            "昨好不喝吃书在有没我他她爸纪".split(""),
-            "天爸妈树花水果你好不喝吃书念".split(""),
-            "我水商店在学校左边花水果你品".split(""),
-            "没爸妈树花水果你好不喝吃书爸".split(""),
-            "有水我不太喜欢吃苹果树花书妈".split(""),
-            "做爸妈树花水果你好不喝吃在树".split(""),
-            "作水树汉语书在书架上花水书果".split(""),
-            "业爸妈树花水果你好不喝吃包花".split(""),
-            "水妈树花水果你好不喝吃书里爸".split(""),
-            "爸爸妈树花水果你好不喝吃面妈".split("")
+            "今天早上我去买一公斤苹果爸妈树花".split(""),
+            "昨天晚上八点半我回家水果你好书在".split(""),
+            "芒果一公斤多少钱爸妈树花水果你好".split(""),
+            "这些桌子都是我家的书在吃喝买卖花".split(""),
+            "今天晚上我给女朋友打电话树花水果你".split(""),
+            "今天中午我在家吃午饭爸妈你好书在".split(""),
+            "这些椅子都不是我家的水果树花爸妈".split(""),
+            "起床以后我去刷牙洗脸妈爸你好果树".split(""),
+            "我我树花水果你好爸妈树花水果爸妈".split(""),
+            "家喜花水果你好爸妈树花水果你好爸".split(""),
+            "有欢果你好爸妈树花水果你好爸妈树".split(""),
+            "四吃你好爸妈树花水果你好爸妈树花".split(""),
+            "口香好爸妈树花水果你好爸妈树花水".split(""),
+            "人蕉爸妈树花水果你好爸妈树花水果".split(""),
+            "我喜欢喝越南白咖啡树花水果你好爸".split(""),
+            "树花水果你好爸妈树花水果你好爸妈".split("")
         ];
 
         const answers = [
-            { id: 1, text: "猫在椅子下面", hanzi: "猫在椅子下面。", pinyin: "Māo zài yǐzi xiàmiàn.", meaning: "Con mèo ở dưới ghế.", r1: 0, c1: 0, r2: 0, c2: 5 },
-            { id: 2, text: "我不买纪念品", hanzi: "我不买纪念品。", pinyin: "Wǒ bù mǎi jìniànpǐn.", meaning: "Tôi không mua quà lưu niệm.", r1: 1, c1: 13, r2: 6, c2: 13 },
-            { id: 3, text: "我没有吃早饭", hanzi: "我没有吃早饭。", pinyin: "Wǒ méiyǒu chī zǎofàn.", meaning: "Tôi chưa ăn sáng.", r1: 2, c1: 1, r2: 2, c2: 6 },
-            { id: 4, text: "昨天我没有做作业", hanzi: "昨天我没有做作业。", pinyin: "Zuótiān wǒ méiyǒu zuò zuòyè.", meaning: "Hôm qua tôi không làm bài tập.", r1: 4, c1: 0, r2: 11, c2: 0 },
-            { id: 5, text: "商店在学校左边", hanzi: "商店在学校左边。", pinyin: "Shāngdiàn zài xuéxiào zuǒbiān.", meaning: "Cửa hàng ở bên trái trường học.", r1: 6, c1: 2, r2: 6, c2: 8 },
-            { id: 6, text: "我不太喜欢吃苹果", hanzi: "我不太喜欢吃苹果。", pinyin: "Wǒ bù tài xǐhuan chī píngguǒ.", meaning: "Tôi không thích ăn táo lắm.", r1: 8, c1: 2, r2: 8, c2: 9 },
-            { id: 7, text: "书在书包里面", hanzi: "书在书包里面。", pinyin: "Shū zài shūbāo lǐmiàn.", meaning: "Sách ở trong cặp sách.", r1: 8, c1: 12, r2: 13, c2: 12 },
-            { id: 8, text: "汉语书在书架上", hanzi: "汉语书在书架上。", pinyin: "Hànyǔ shū zài shūjià shàng.", meaning: "Sách tiếng Hán ở trên giá sách.", r1: 10, c1: 3, r2: 10, c2: 9 }
+            { id: 1, text: "今天早上我去买一公斤苹果", hanzi: "今天早上我去买一公斤苹果。", pinyin: "Jīntiān zǎoshang wǒ qù mǎi yī gōngjīn píngguǒ.", meaning: "Sáng nay tôi đi mua 1kg táo.", r1: 0, c1: 0, r2: 0, c2: 11 },
+            { id: 2, text: "昨天晚上八点半我回家", hanzi: "昨天晚上八点半我回家。", pinyin: "Zuótiān wǎnshang bā diǎn bàn wǒ huí jiā.", meaning: "Tối qua 8h30 tôi về nhà.", r1: 1, c1: 0, r2: 1, c2: 9 },
+            { id: 3, text: "芒果一公斤多少钱", hanzi: "芒果一公斤多少钱？", pinyin: "Mángguǒ yī gōngjīn duōshao qián?", meaning: "Xoài 1kg bao nhiêu tiền?", r1: 2, c1: 0, r2: 2, c2: 7 },
+            { id: 4, text: "这些桌子都是我家的", hanzi: "这些桌子都是我家的。", pinyin: "Zhèxiē zhuōzi dōu shì wǒ jiā de.", meaning: "Những cái bàn này đều là của nhà tôi.", r1: 3, c1: 0, r2: 3, c2: 8 },
+            { id: 5, text: "今天晚上我给女朋友打电话", hanzi: "今天晚上我给女朋友打电话。", pinyin: "Jīntiān wǎnshang wǒ gěi nǚpéngyou dǎ diànhuà.", meaning: "Tối nay tôi gọi điện cho bạn gái.", r1: 4, c1: 0, r2: 4, c2: 11 },
+            { id: 6, text: "今天中午我在家吃午饭", hanzi: "今天中午我在家吃午饭。", pinyin: "Jīntiān zhōngwǔ wǒ zài jiā chī wǔfàn.", meaning: "Trưa nay tôi ăn cơm ở nhà.", r1: 5, c1: 0, r2: 5, c2: 9 },
+            { id: 7, text: "这些椅子都不是我家的", hanzi: "这些椅子都不是我家的。", pinyin: "Zhèxiē yǐzi dōu bù shì wǒ jiā de.", meaning: "Những cái ghế này đều không phải của nhà tôi.", r1: 6, c1: 0, r2: 6, c2: 9 },
+            { id: 8, text: "起床以后我去刷牙洗脸", hanzi: "起床以后我去刷牙洗脸。", pinyin: "Qǐchuáng yǐhòu wǒ qù shuāyá xǐliǎn.", meaning: "Sau khi thức dậy tôi đi đánh răng rửa mặt.", r1: 7, c1: 0, r2: 7, c2: 9 },
+            { id: 9, text: "我家有四口人", hanzi: "我家有四口人。", pinyin: "Wǒ jiā yǒu sì kǒu rén.", meaning: "Nhà tôi có 4 người.", r1: 8, c1: 0, r2: 13, c2: 0 },
+            { id: 10, text: "我喜欢吃香蕉", hanzi: "我喜欢吃香蕉。", pinyin: "Wǒ xǐhuan chī xiāngjiāo.", meaning: "Tôi thích ăn chuối.", r1: 8, c1: 1, r2: 13, c2: 1 },
+            { id: 11, text: "我喜欢喝越南白咖啡", hanzi: "我喜欢喝越南白咖啡。", pinyin: "Wǒ xǐhuan hē Yuènán bái kāfēi.", meaning: "Tôi thích uống cà phê trắng Việt Nam.", r1: 14, c1: 0, r2: 14, c2: 8 }
         ];
 
         let foundAnswers = [];
@@ -449,7 +457,6 @@
         let startR = -1, startC = -1;
         let currentSelection = [];
 
-        // Cấu hình pháo hoa
         const confettiSettings = { particleCount: 80, spread: 70, origin: { y: 0.6 }, colors: ['#ff4757', '#ffa502', '#2ed573', '#1e90ff', '#ff9ff3'] };
 
         function init() {
@@ -492,8 +499,8 @@
         function renderGrid() {
             const grid = document.getElementById('grid');
             grid.innerHTML = '';
-            for (let r = 0; r < 14; r++) {
-                for (let c = 0; c < 14; c++) {
+            for (let r = 0; r < 16; r++) {
+                for (let c = 0; c < 16; c++) {
                     const cell = document.createElement('div');
                     cell.className = 'cell';
                     cell.textContent = gridData[r][c];
@@ -589,36 +596,29 @@
             );
 
             if (matchIndex !== -1) {
-                // === CHỌN ĐÚNG ===
+                // CHỌN ĐÚNG
                 let match = answers[matchIndex];
                 foundAnswers.push(match.id);
                 
-                // Đổi màu xanh cho các chữ đã chọn
                 currentSelection.forEach(item => {
                     const cell = document.getElementById(`cell-${item.r}-${item.c}`);
                     cell.classList.remove('selecting');
                     cell.classList.add('found');
                 });
 
-                // 1. Kích hoạt pháo hoa
                 confetti(confettiSettings);
-                
-                // 2. Hiệu ứng rung màn hình nhẹ
                 document.getElementById('grid-panel').classList.add('shake-effect');
                 setTimeout(() => {
                     document.getElementById('grid-panel').classList.remove('shake-effect');
                 }, 400);
 
-                // 3. Chuyển sang câu tiếp theo chưa giải
                 let nextUnsolvedIndex = answers.findIndex(ans => !foundAnswers.includes(ans.id));
                 if (nextUnsolvedIndex !== -1) {
                     currentClueIndex = nextUnsolvedIndex;
                 } else {
-                    // Nếu đã giải hết
                     currentClueIndex = matchIndex; 
                     setTimeout(() => {
                         document.getElementById('win-overlay').style.display = 'flex';
-                        // Bắn pháo hoa liên tục khi thắng
                         let duration = 3 * 1000;
                         let end = Date.now() + duration;
                         (function frame() {
@@ -631,7 +631,7 @@
                 
                 renderSingleClue();
             } else {
-                // === CHỌN SAI ===
+                // CHỌN SAI
                 currentSelection.forEach(item => {
                     const cell = document.getElementById(`cell-${item.r}-${item.c}`);
                     cell.classList.remove('selecting');
