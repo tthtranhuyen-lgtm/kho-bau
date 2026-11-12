@@ -92,7 +92,6 @@
             transition: all 0.3s ease;
         }
 
-        /* Class để ẩn bản đồ */
         .map-wrapper.hidden {
             display: none;
         }
@@ -268,7 +267,6 @@
             position: relative;
         }
 
-        /* Nút Ẩn/Hiện Bản Đồ */
         .toggle-map-btn {
             position: absolute;
             top: 10px;
@@ -296,7 +294,7 @@
             background: #dfe4ea;
             padding: 10px;
             border-radius: 16px;
-            margin: 40px auto 0 auto; /* Tạo khoảng trống trên cho nút Toggle */
+            margin: 40px auto 0 auto;
             width: fit-content;
         }
 
@@ -402,7 +400,6 @@
     </header>
 
     <div class="game-container">
-        <!-- BẢN ĐỒ KHO BÁU -->
         <div class="map-wrapper" id="map-wrapper">
             <div class="map-panel">
                 <div class="map-icon icon-ship">⛵</div>
@@ -427,9 +424,7 @@
             </div>
         </div>
 
-        <!-- BẢNG MA TRẬN -->
         <div class="grid-panel" id="grid-panel">
-            <!-- Nút ẩn/hiện bản đồ -->
             <button class="toggle-map-btn" id="toggle-map-btn" onclick="toggleMap()">👁️ Ẩn Bản Đồ</button>
             <div class="grid" id="grid"></div>
         </div>
@@ -444,26 +439,27 @@
     </div>
 
     <script>
-        // Ma trận 16x16
+        // MA TRẬN ĐÃ ĐƯỢC SỬA LỖI VÀ CĂN CHỈNH CHÍNH XÁC TỪNG Ô
         const gridData = [
-            "今花水树爸妈树花水果你好爸妈树花".split(""),
-            "这天花这些桌子都是我家的树花水果".split(""),
-            "些花早花水果今天中午我在家吃午饭".split(""),
-            "椅花花上水果爸妈树花水果你好起花".split(""),
-            "子花水花我果你好爸妈树花水果床话".split(""),
-            "都水果你好去爸妈树花水果你好以电".split(""),
-            "不爸妈树花水买果你家好不喝吃后打".split(""),
-            "是爸妈树花水果一回你好不喝吃我友".split(""),
-            "我爸妈树花水果我公你好不喝吃去朋".split(""),
-            "家爸妈树花水半果你斤好不喝吃刷女".split(""),
-            "的爸妈树花点水果你好苹不喝吃牙给".split(""),
-            "花爸妈树八花水果你好不果喝吃洗我".split(""),
-            "树花水上芒果一公斤多少钱你好脸上".split(""),
-            "爸妈我喜欢喝越南白咖啡花水果你晚".split(""),
-            "水天我家有四口人树花水果你好爸天".split(""),
-            "昨花我喜欢吃香蕉爸妈树花水果你今".split("")
+            "今花水树爸妈树花水果你好爸妈树花".split(""), // 0
+            "这天花这些桌子都是我家的树花水果".split(""), // 1
+            "些花早花水果今天中午我在家吃午饭".split(""), // 2
+            "椅花花上水果爸妈树花水果你好起花".split(""), // 3
+            "子花水花我果你好爸妈树花水果床话".split(""), // 4
+            "都水果你好去爸妈树花水果你好以电".split(""), // 5
+            "不爸妈树花水买果你家好不喝吃后打".split(""), // 6
+            "是爸妈树花水果一回你好不喝吃我友".split(""), // 7
+            "我爸妈树花水果我公你好不喝吃去朋".split(""), // 8
+            "家爸妈树花水半果你斤好不喝吃刷女".split(""), // 9
+            "的爸妈树花点水果你好苹不喝吃牙给".split(""), // 10
+            "花爸妈树八花水果你好不果喝吃洗我".split(""), // 11
+            "树花水上芒果一公斤多少钱你好脸上".split(""), // 12
+            "爸妈晚我喜欢喝越南白咖啡花水果晚".split(""), // 13
+            "水天我家有四口人树花水果你好爸天".split(""), // 14
+            "昨花我喜欢吃香蕉爸妈树花水果你今".split("")  // 15
         ];
 
+        // TỌA ĐỘ ĐÃ ĐƯỢC XÁC MINH KHỚP 100% VỚI MA TRẬN TRÊN
         const originalAnswers = [
             { id: 1, text: "今天早上我去买一公斤苹果", hanzi: "今天早上我去买一公斤苹果。", pinyin: "Jīntiān zǎoshang wǒ qù mǎi yī gōngjīn píngguǒ.", meaning: "Sáng nay tôi đi mua 1kg táo.", r1: 0, c1: 0, r2: 11, c2: 11 },
             { id: 2, text: "昨天晚上八点半我回家", hanzi: "昨天晚上八点半我回家。", pinyin: "Zuótiān wǎnshang bā diǎn bàn wǒ huí jiā.", meaning: "Tối qua 8h30 tôi về nhà.", r1: 15, c1: 0, r2: 6, c2: 9 },
@@ -475,7 +471,7 @@
             { id: 8, text: "起床以后我去刷牙洗脸", hanzi: "起床以后我去刷牙洗脸。", pinyin: "Qǐchuáng yǐhòu wǒ qù shuāyá xǐliǎn.", meaning: "Sau khi thức dậy tôi đi đánh răng rửa mặt.", r1: 3, c1: 14, r2: 12, c2: 14 },
             { id: 9, text: "我家有四口人", hanzi: "我家有四口人。", pinyin: "Wǒ jiā yǒu sì kǒu rén.", meaning: "Nhà tôi có 4 người.", r1: 14, c1: 2, r2: 14, c2: 7 },
             { id: 10, text: "我喜欢吃香蕉", hanzi: "我喜欢吃香蕉。", pinyin: "Wǒ xǐhuan chī xiāngjiāo.", meaning: "Tôi thích ăn chuối.", r1: 15, c1: 2, r2: 15, c2: 7 },
-            { id: 11, text: "我喜欢喝越南白咖啡", hanzi: "我喜欢喝越南白咖啡。", pinyin: "Wǒ xǐhuan hē Yuènán bái kāfēi.", meaning: "Tôi thích uống cà phê trắng Việt Nam.", r1: 13, c1: 2, r2: 13, c2: 10 }
+            { id: 11, text: "我喜欢喝越南白咖啡", hanzi: "我喜欢喝越南白咖啡。", pinyin: "Wǒ xǐhuan hē Yuènán bái kāfēi.", meaning: "Tôi thích uống cà phê trắng Việt Nam.", r1: 13, c1: 3, r2: 13, c2: 11 }
         ];
 
         let answers = []; 
@@ -505,7 +501,6 @@
             renderGrid();
         }
 
-        // Hàm Ẩn / Hiện Bản Đồ
         function toggleMap() {
             const mapWrapper = document.getElementById('map-wrapper');
             const toggleBtn = document.getElementById('toggle-map-btn');
@@ -514,11 +509,11 @@
             
             if (mapWrapper.classList.contains('hidden')) {
                 toggleBtn.innerText = '👁️ Hiện Bản Đồ';
-                toggleBtn.style.background = '#ff4757'; // Đổi màu đỏ khi đang ẩn
+                toggleBtn.style.background = '#ff4757';
                 toggleBtn.style.boxShadow = '0 3px 0 #c0392b';
             } else {
                 toggleBtn.innerText = '👁️ Ẩn Bản Đồ';
-                toggleBtn.style.background = '#0984e3'; // Trả lại màu xanh
+                toggleBtn.style.background = '#0984e3';
                 toggleBtn.style.boxShadow = '0 3px 0 #074b82';
             }
         }
